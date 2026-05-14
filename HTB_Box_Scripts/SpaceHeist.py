@@ -7,10 +7,12 @@ import matplotlib.pyplot as plt
 import hashlib
 import string
 from scipy.signal import find_peaks
+from collections import Counter
 
-HOST = "154.57.164.78"  # The server's hostname or IP address
-PORT = 32550  # The port used by the server
+HOST = "154.57.164.67"  # The server's hostname or IP address
+PORT = 31136  # The port used by the server
 SECRET = b'qvb4a1b07E870B' # secret used for challenge/response
+PASSWORD = b'9679216205204468'
 
 def recv_bytes(conn, n_bytes):
     sample_buffer = b''
@@ -228,11 +230,16 @@ def send_password(password):
         label, trace = recv_trace(conn)
         traces[label] = trace
 
-        print(traces.keys())
+        #print(traces.keys())
         #print(traces["trace_led_auth"])
         #print(traces["trace_led_unlocked"])
         #print(traces["trace_mcu"])
-        printtrace(traces, password)
+        
+        
+        #printtrace(traces, password)
+        peak_positions = [int(i) for i, v in enumerate(traces["trace_mcu"]) if v > 1.5][:21]
+        
+        return traces, peak_positions
 
 def challenge_response():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as conn:
@@ -271,17 +278,47 @@ def challenge_response():
         print(authenticated)
         passcode = conn.recv(1024).strip()
         print(passcode)
+        conn.send(PASSWORD)
+        authenticated = conn.recv(1024).strip()
+        print(authenticated)
+        authenticated = conn.recv(1024).strip()
+        print(authenticated)
+        authenticated = conn.recv(1024).strip()
+        print(authenticated)
+        
 
         # TODO - once we have the passcode, send it as well, probably retrieve the flag after this
 
 
 
-#challenge_response()
+challenge_response()
 
-chars = list(string.ascii_letters + string.digits)
+# chars = list(string.ascii_letters + string.digits)
+# peak_position_list = []
+# password = ""
 
+# for i in range(20):
+#     for digit in list(string.digits):
+#         password_candidate = digit
+#         traces, peak_positions = send_password(password + password_candidate)
+#         peak_position_list.append(peak_positions)
+#     for dig, peak in enumerate(peak_position_list):
+#         print("Iter: {} Digit: {}\nPeaks: {}".format(i, dig, peak)) 
+#     peaks_of_interest = [peak[2 + i] for peak in peak_position_list]
+#     print("Peaks of interest: \n{}".format(peaks_of_interest))
+#     counts = Counter(peaks_of_interest)
+#     outlier_val = [val for val, count in counts.items() if count == 1][0]
+#     outlier = peaks_of_interest.index(outlier_val) # This is our digit to the password!
+#     password = password + str(outlier)
+#     print("##### PASSWORD VALUE FOUND #####\n Password: {} \n #########################".format(password))
+#     peak_position_list = []
 
-#for i in range(10):
-for digit in list(string.digits):
-    password_candidate =  digit * 10
-    send_password(password_candidate)
+# trace_list = []
+# temp = []
+# #for i in range(10):
+# for digit in list(string.digits):
+#     for i in range(5): # Do this 5 times each, 50 total
+#         password_candidate =  digit
+#         temp.append(send_password(password_candidate))
+#     trace_list.append(temp)
+#     temp = []
