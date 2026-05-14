@@ -12,7 +12,7 @@ from collections import Counter
 HOST = "154.57.164.67"  # The server's hostname or IP address
 PORT = 31136  # The port used by the server
 SECRET = b'qvb4a1b07E870B' # secret used for challenge/response
-PASSWORD = b'9679216205204468'
+PASSWORD = b'oops'
 
 def recv_bytes(conn, n_bytes):
     sample_buffer = b''
